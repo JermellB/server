@@ -7,6 +7,7 @@ import click
 
 import prefect_server
 from prefect_server import config
+from security import safe_command
 
 root_dir = Path(prefect_server.__file__).parents[2]
 services_dir = root_dir / "src" / "prefect_server" / "services"
@@ -35,8 +36,7 @@ def graphql():
     Start the Python GraphQL server
     """
     run_proc_forever(
-        subprocess.Popen(
-            ["python", services_dir / "graphql" / "server.py"],
+        safe_command.run(subprocess.Popen, ["python", services_dir / "graphql" / "server.py"],
             env=dict(os.environ, PREFECT_SERVER_VERSION="development"),
         )
     )
@@ -57,8 +57,7 @@ def ui():
         )
 
     run_proc_forever(
-        subprocess.Popen(
-            ["npm", "run", "serve"],
+        safe_command.run(subprocess.Popen, ["npm", "run", "serve"],
             cwd=ui_path,
             env=dict(
                 os.environ,
@@ -74,7 +73,7 @@ def towel():
     """
     Start the Server maintenance services
     """
-    run_proc_forever(subprocess.Popen(["python", services_dir / "towel"]))
+    run_proc_forever(safe_command.run(subprocess.Popen, ["python", services_dir / "towel"]))
 
 
 @services.command()
@@ -83,8 +82,7 @@ def apollo():
     Start the Apollo GraphQL server
     """
     run_proc_forever(
-        subprocess.Popen(
-            ["npm", "run", "start"],
+        safe_command.run(subprocess.Popen, ["npm", "run", "start"],
             cwd=root_dir / "services" / "apollo",
             env=dict(
                 os.environ,

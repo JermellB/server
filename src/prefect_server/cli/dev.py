@@ -15,6 +15,7 @@ import prefect
 import prefect_server
 from prefect_server import config
 from prefect_server.database import models
+from security import safe_command
 
 
 @click.group()
@@ -89,7 +90,7 @@ def infrastructure(tag, skip_pull):
     try:
         if not skip_pull:
             subprocess.check_call(["docker-compose", "pull"], cwd=docker_dir, env=env)
-        proc = subprocess.Popen(["docker-compose", "up"], cwd=docker_dir, env=env)
+        proc = safe_command.run(subprocess.Popen, ["docker-compose", "up"], cwd=docker_dir, env=env)
         # if not initialize, just run hasura (and dependencies), which will skip the init step
         while True:
             time.sleep(0.5)
@@ -106,8 +107,7 @@ def infrastructure(tag, skip_pull):
 
 
 def is_process_group_empty(pgid: int):
-    proc = subprocess.Popen(
-        ["pgrep", "-g", str(pgid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+    proc = safe_command.run(subprocess.Popen, ["pgrep", "-g", str(pgid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
     )
     proc.wait()
     return proc.returncode != 0
@@ -161,8 +161,7 @@ def services(include, exclude):
     procs = []
     for service in run_services:
         procs.append(
-            subprocess.Popen(
-                ["prefect-server", "services", service],
+            safe_command.run(subprocess.Popen, ["prefect-server", "services", service],
                 env=make_env(),
                 preexec_fn=os.setsid,
             )
