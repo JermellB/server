@@ -1,8 +1,8 @@
 import asyncio
-import random
 from typing import Union
 
 from prefect_server import config, utilities
+import secrets
 
 
 class LoopService:
@@ -47,7 +47,7 @@ class LoopService:
         """
 
         # randomly stagger the start time
-        startup_delay = random.randint(0, int(self.loop_seconds))
+        startup_delay = secrets.SystemRandom().randint(0, int(self.loop_seconds))
         self.logger.info(
             f"{self.name} will start after an initial delay of {startup_delay} seconds..."
         )
