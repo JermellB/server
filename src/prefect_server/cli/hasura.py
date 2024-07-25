@@ -33,7 +33,7 @@ def apply_hasura_metadata(endpoint=None, metadata_path=None, verbose=True):
 
     response = requests.post(
         endpoint, json={"type": "replace_metadata", "args": metadata},
-    )
+    timeout=60)
     try:
         response.raise_for_status()
         if verbose:
@@ -104,7 +104,7 @@ def export_metadata(endpoint, metadata_path):
         endpoint = os.path.join(endpoint, "v1", "query")
         response = requests.post(
             endpoint, json={"type": "export_metadata", "args": {}},
-        )
+        timeout=60)
         response.raise_for_status()
 
         with open(metadata_path, "w") as f:
@@ -135,7 +135,7 @@ def drop_inconsistent_metadata(endpoint):
         endpoint = os.path.join(endpoint, "v1", "query")
         response = requests.post(
             endpoint, json={"type": "drop_inconsistent_metadata", "args": {}},
-        )
+        timeout=60)
         response.raise_for_status()
 
         click.secho("\nFinished!", fg="green")
@@ -163,7 +163,7 @@ def clear_metadata(endpoint):
     try:
         click.secho("\nClearing Hasura metadata...")
         endpoint = os.path.join(endpoint, "v1", "query")
-        response = requests.post(endpoint, json={"type": "clear_metadata", "args": {}},)
+        response = requests.post(endpoint, json={"type": "clear_metadata", "args": {}},timeout=60)
         response.raise_for_status()
         click.secho("\nFinished!", fg="green")
     except Exception as exc:
@@ -192,7 +192,7 @@ def reload_metadata(endpoint):
         endpoint = os.path.join(endpoint, "v1", "query")
         response = requests.post(
             endpoint, json={"type": "reload_metadata", "args": {}},
-        )
+        timeout=60)
         response.raise_for_status()
         click.secho("\nFinished!", fg="green")
     except Exception as exc:
